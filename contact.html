@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Marinos Tselani — Connect</title>
+    <meta
+      name="description"
+      content="Marinos Tselani — Informatics and Computer Engineering graduate focused on software, data and AI."
+    />
+
+    <!-- External CSS -->
+    <link rel="stylesheet" href="style.css" />
+
+    <!-- External JS -->
+    <script src="page-data.js" defer></script>
+    <script src="page-router.js" defer></script>
+    <script src="main.js" defer></script>
+    <script src="home-archer.js" defer></script>
+    <script src="disco-orb.js" defer></script>
+    <script src="visitor-config.js" defer></script>
+    <script src="visitor-map.js" defer></script>
+    <script src="connect-globe.js" defer></script>
+    <script src="globe-merge.js" defer></script>
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <div class="page">
+      <header class="topbar">
+        <a class="logo" href="index.html">marinos</a>
+
+        <nav class="nav" id="nav" aria-label="Main navigation">
+<a href="index.html">home</a>
+<a href="about.html">about</a>
+<a href="work.html">projects</a>
+<a href="research.html">research</a>
+<a href="contact.html" aria-current="page">connect</a>
+</nav>
+
+        <div class="top-meta"><span class="local-time-dot" aria-hidden="true"></span><span>PEFKI | ATHENS | GREECE — <time class="athens-clock" aria-label="Local time in Athens">--:--:--</time></span></div>
+        <button class="menu" id="menu" aria-label="Open menu" aria-expanded="false" aria-controls="nav">☰</button>
+      </header>
+
+      <main id="main" class="page-content">
+<section id="connect" class="connect">
+          <h1 class="section-index connect-heading"><span class="visually-hidden">connect</span><span class="connect-typing" aria-hidden="true">connect</span></h1>
+          <div class="connect-globe" aria-hidden="true">
+            <svg viewBox="0 0 320 320" focusable="false">
+              <defs><radialGradient id="globe-shade" cx="32%" cy="28%" r="75%"><stop offset="0" stop-color="#31594b" stop-opacity="0"/><stop offset="1" stop-color="#31594b" stop-opacity=".08"/></radialGradient></defs>
+              <circle cx="160" cy="160" r="140" fill="url(#globe-shade)" stroke="currentColor" stroke-opacity=".3" stroke-width=".75"/>
+              <path class="globe-grid" fill="none" stroke="currentColor" stroke-opacity=".16" stroke-width=".65"/>
+              <path class="globe-coasts" fill="none" stroke="currentColor" stroke-opacity=".65" stroke-width=".9" stroke-linejoin="round"/>
+              <path class="globe-land" fill="currentColor" opacity=".55"/>
+            </svg>
+          </div>
+
+
+          <div class="visitor-map-info">
+            <p class="visitor-map-status" role="status">Visitor map not connected yet</p>
+            <p class="visitor-map-note">Approximate locations · no raw IP addresses stored</p>
+            <details class="visitor-location-details">
+              <summary>Visitor locations · hover a dot for status</summary>
+              <p>Green: online within 90 seconds · amber: last seen. Locations may group several visitors.</p>
+              <ul class="visitor-location-list"></ul>
+            </details>
+            <div class="visitor-demo-controls" aria-label="Visitor map preview" hidden>
+              <button type="button" data-visitor-preview="visitors">Preview visitors</button>
+              <button type="button" data-visitor-preview="empty">Preview zero visits</button>
+              <button type="button" data-visitor-preview="off">Exit preview</button>
+            </div>
+          </div>
+          <div class="connect-directory reveal">
+            <section class="connect-group" aria-labelledby="contact-heading">
+              <h2 id="contact-heading">Contact</h2>
+              <ul>
+                <li><a class="connect-option" href="mailto:marinotselani12@gmail.com"><span>email</span><span aria-hidden="true">↗</span></a></li>
+                <li><span class="connect-option is-unavailable" aria-disabled="true"><span>academic email <small>Outlook</small></span><span aria-hidden="true">—</span></span></li>
+                <li><span class="connect-option is-unavailable" aria-disabled="true"><span>telegram</span><span aria-hidden="true">—</span></span></li>
+              </ul>
+            </section>
+            <section class="connect-group" aria-labelledby="social-heading">
+              <h2 id="social-heading">Social</h2>
+              <ul>
+                <li><a class="connect-option" href="https://github.com/mrns20" target="_blank" rel="noopener noreferrer"><span>github</span><span aria-hidden="true">↗</span></a></li>
+                <li><span class="connect-option is-unavailable" aria-disabled="true"><span>x</span><span aria-hidden="true">—</span></span></li>
+                <li><span class="connect-option is-unavailable" aria-disabled="true"><span>instagram</span><span aria-hidden="true">—</span></span></li>
+              </ul>
+            </section>
+            <section class="connect-group" aria-labelledby="research-heading">
+              <h2 id="research-heading">Research</h2>
+              <ul>
+                <li><span class="connect-option is-unavailable" aria-disabled="true"><span>google scholar</span><span aria-hidden="true">—</span></span></li>
+                <li><span class="connect-option is-unavailable" aria-disabled="true"><span>arXiv</span><span aria-hidden="true">—</span></span></li>
+              </ul>
+            </section>
+          </div>
+        </section>
+</main>
+
+      <footer class="site-footer">
+        <div class="footer-side">Marino Tselani &copy; 2026</div>
+
+
+        <div class="walker-track" aria-hidden="true">
+          <div class="walker">
+            <svg viewBox="0 0 30 30">
+              <rect
+                class="leg-a"
+                x="9"
+                y="21"
+                width="3"
+                height="8"
+                rx="1.5"
+                fill="var(--fg)"
+              />
+              <rect
+                class="leg-b"
+                x="18"
+                y="21"
+                width="3"
+                height="8"
+                rx="1.5"
+                fill="var(--fg)"
+              />
+              <ellipse cx="15" cy="12.5" rx="8.5" ry="9.5" fill="var(--fg)" />
+              <path d="M6.8 8 C6.2 4.8 9.2 2.8 12.2 5.4 Z" fill="var(--fg)" />
+              <path
+                d="M23.2 8 C23.8 4.8 20.8 2.8 17.8 5.4 Z"
+                fill="var(--fg)"
+              />
+              <circle cx="11.5" cy="12" r="1.7" fill="var(--bg)" />
+              <circle cx="18.5" cy="12" r="1.7" fill="var(--bg)" />
+              <circle cx="11.5" cy="12" r=".65" fill="var(--fg)" />
+              <circle cx="18.5" cy="12" r=".65" fill="var(--fg)" />
+              <path d="M15 14 l-1.8 2.4 h3.6 z" fill="var(--bg)" />
+            </svg>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
