@@ -108,7 +108,7 @@
     drift=orbit?.querySelector('.orb-drift');
     if(!small.matches && cooldown===Infinity) cooldown=0;
     if(small.matches) { cooldown=0; mobileReadyAt=performance.now()+1800; }
-    if(globe && drift && !document.hidden && !reduced.matches) frame=requestAnimationFrame(tick);
+    if(globe && drift && !document.hidden && !reduced.matches && !(small.matches && isButton)) frame=requestAnimationFrame(tick);
   }
   document.addEventListener('DOMContentLoaded',sync);
   document.addEventListener('portfolio:page',sync);

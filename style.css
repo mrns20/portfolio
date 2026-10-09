@@ -1702,6 +1702,6 @@ a.connect-option:focus-visible { outline: 1px solid var(--accent); outline-offse
 }
 /* Mobile-only direct encounters; desktop animation rules remain unchanged. */
 @media (max-width: 800px) {
-  .about-page .cv-download { position: relative; top: auto; right: auto; }
+
   .welcome-orbit.orb-companion.is-mobile-merging { opacity: 1; }
 }
