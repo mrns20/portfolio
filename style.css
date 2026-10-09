@@ -1705,3 +1705,11 @@ a.connect-option:focus-visible { outline: 1px solid var(--accent); outline-offse
 
   .welcome-orbit.orb-companion.is-mobile-merging { opacity: 1; }
 }
+/* Keep mobile Connect glow local and avoid backdrop-blur flicker in the footer. */
+@media (max-width: 800px) {
+  .connect .connect-globe { clip-path: inset(-32px); }
+  body:has(.connect) .site-footer {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}

@@ -67,7 +67,7 @@
          : Math.abs(ox-gx)<g.width*.5 && oy<gy && gy-oy<g.height+140)) begin(now);
     if(state) {
       const elapsed=now-state.start;
-      const fusedUntil = small.matches ? 4650 : 30650;
+      const fusedUntil = small.matches ? 10650 : 30650;
       const finishedAt = fusedUntil + 650;
       if (elapsed >= 650 && !state.announced) {
         state.announced = true;
@@ -75,7 +75,7 @@
           detail: { kind: 'merge', text: "DAMN BRO THAT'S CRAAAAAAZY" }
         }));
       }
-      // Desktop keeps its thirty-second encounter; mobile uses four seconds.
+      // Desktop keeps its thirty-second encounter; mobile uses ten seconds.
       const weight=elapsed<650 ? elapsed/650 : elapsed<fusedUntil ? 1 : Math.max(0,1-(elapsed-fusedUntil)/650);
       const eased=weight*weight*(3-2*weight);
       drift.style.translate=`${(gx-ox)*eased}px ${(gy-oy)*eased}px`;
@@ -95,7 +95,8 @@
       if(small.matches && elapsed>=650 && elapsed<fusedUntil && now-lastPulse>1400) { pulse(.15); lastPulse=now; }
       previousKick=kick;
       if(elapsed>=finishedAt) {
-        reset(); cooldown=small.matches ? Infinity : now+12000;
+        const nextEncounter = small.matches ? state.start + 60000 : now + 12000;
+        reset(); cooldown=nextEncounter;
       }
     }
     frame=requestAnimationFrame(tick);
