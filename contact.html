@@ -19,7 +19,8 @@
     <script src="home-archer.js" defer></script>
     <script src="disco-orb.js" defer></script>
     <script src="visitor-config.js" defer></script>
-    <script src="visitor-map.js" defer></script>
+    <script src="privacy.js" defer></script>
+    <script src="visitor-countries.js" defer></script>
     <script src="connect-globe.js" defer></script>
     <script src="globe-merge.js" defer></script>
   </head>
@@ -57,11 +58,11 @@
 
 
           <div class="visitor-map-info">
-            <p class="visitor-map-status" role="status">Visitor map not connected yet</p>
-            <p class="visitor-map-note">Approximate locations · no raw IP addresses stored</p>
+            <p class="visitor-map-status" role="status">Visitor statistics are off until you allow them</p>
+            <p class="visitor-map-note">Optional country totals · no city or live activity shown</p>
             <details class="visitor-location-details">
-              <summary>Visitor locations · hover a dot for status</summary>
-              <p>Green: online within 90 seconds · amber: last seen. Locations may group several visitors.</p>
+              <summary>Visitor countries</summary>
+              <p>Only countries with at least three consented sessions in the last 24 hours are shown.</p>
               <ul class="visitor-location-list"></ul>
             </details>
             <div class="visitor-demo-controls" aria-label="Visitor map preview" hidden>

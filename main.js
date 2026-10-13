@@ -1,4 +1,4 @@
-// Remember heading visits for this tab, with an in-memory fallback for local files.
+// Remember heading visits only in page memory, without browser storage.
 const visitedHeadings = new Set();
 const initializedHeadings = new WeakSet();
 const initializeHeadingTyping = () => {
@@ -8,10 +8,8 @@ const initializeHeadingTyping = () => {
     const page = heading.closest('section')?.id || heading.textContent.trim();
     const key = 'portfolio:heading-visited:v1:' + page;
     let visited = visitedHeadings.has(key);
-    try { visited = visited || sessionStorage.getItem(key) === '1'; } catch {}
     heading.classList.toggle('is-first-visit', !visited);
     visitedHeadings.add(key);
-    try { sessionStorage.setItem(key, '1'); } catch {}
   });
 };
 
