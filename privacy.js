@@ -54,7 +54,9 @@
     const settings = document.createElement('button');
     settings.type = 'button'; settings.className = 'privacy-settings'; settings.textContent = 'Privacy settings';
     settings.addEventListener('click', () => { update(); panel.hidden = false; panel.querySelector('[data-decline]').focus(); });
-    document.body.append(settings);
+    const footerIdentity = document.querySelector('.site-footer .footer-side');
+    footerIdentity.classList.add('footer-identity');
+    footerIdentity.append(settings);
     panel.querySelector('[data-accept]').addEventListener('click', () => { if (!blocked) choose('accepted'); });
     panel.querySelector('[data-decline]').addEventListener('click', () => choose('declined'));
     panel.querySelector('[data-close]').addEventListener('click', () => { panel.hidden = true; settings.focus(); });
