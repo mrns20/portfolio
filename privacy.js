@@ -97,6 +97,14 @@
     panel.querySelector('[data-close]').addEventListener('click', () => { showPanel(false); settings.focus(); });
     panel.addEventListener('keydown', event => { if (event.key === 'Escape') { showPanel(false); settings.focus(); } });
     panel.querySelector('[data-notice]').addEventListener('click', () => notice.showModal());
+    notice.addEventListener('click', event => {
+      if (event.target !== notice) return;
+      const bounds = notice.getBoundingClientRect();
+      if (event.clientX < bounds.left || event.clientX > bounds.right ||
+          event.clientY < bounds.top || event.clientY > bounds.bottom) {
+        notice.close();
+      }
+    });
     update();
     firstConnect();
   });
