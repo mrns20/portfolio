@@ -1391,7 +1391,34 @@ a.connect-option:focus-visible { outline: 1px solid var(--accent); outline-offse
 .visitor-location-details summary { cursor: pointer; }
 .visitor-location-details p { margin: 5px 0; }
 .visitor-location-list { list-style: none; padding: 0; margin: 4px 0; max-height: 130px; overflow-y: auto; }
-.visitor-location-list:empty::after { content: 'No visitor locations to show'; }
+.visitor-location-list:empty::after { content: 'No approximate cities to show'; }
+
+/* Consent-based globe statistics. */
+.connect .visitor-map-info { width: min(100%, 38rem); min-width: 0; margin-inline: auto; }
+.visitor-counts { display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline; gap: .35rem .65rem; margin: .5rem 0; font: .75rem/1.7 var(--mono); color: var(--muted); }
+.visitor-counts strong { font-weight: 500; color: var(--fg); font-variant-numeric: tabular-nums; }
+.visitor-divider { opacity: .45; }
+.visitor-window { white-space: nowrap; }
+.visitor-ticker { width: 100%; overflow: hidden; padding-block: .4rem; mask-image: linear-gradient(to right, transparent, #000 5%, #000 95%, transparent); }
+.visitor-ticker:focus-visible { outline: 1px solid var(--accent); outline-offset: 3px; mask-image: none; }
+.visitor-ticker-track { display: flex; width: max-content; min-width: 200%; animation: country-ticker var(--ticker-duration, 28s) linear infinite; }
+.visitor-ticker-track:empty { display: none; }
+.visitor-ticker-group { display: flex; flex: 1 0 auto; align-items: center; justify-content: space-around; gap: 2rem; padding-right: 2rem; font: .6875rem/1.6 var(--mono); color: var(--accent); white-space: nowrap; }
+.visitor-ticker-group > span::before { content: ''; display: inline-block; width: 4px; height: 4px; margin-right: .5rem; background: #b77535; }
+.visitor-ticker:hover .visitor-ticker-track, .visitor-ticker:focus-within .visitor-ticker-track, .visitor-ticker.is-paused .visitor-ticker-track { animation-play-state: paused; }
+.visitor-statistics-caption { display: flex; flex-wrap: wrap; gap: .5rem; justify-content: center; align-items: baseline; }
+.visitor-statistics-caption [data-ticker-pause] { appearance: none; border: 0; background: transparent; color: var(--muted); padding: .35rem; font: .625rem/1.5 var(--mono); cursor: pointer; text-decoration: underline; text-underline-offset: .2em; }
+.visitor-statistics-caption [data-ticker-pause]:focus-visible { outline: 1px solid var(--accent); }
+.visitor-map-info:not(:has(.visitor-ticker-group > span)) [data-ticker-pause] { display: none; }
+.globe-country-light { transition: opacity 1.2s ease; }
+@keyframes country-ticker { to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) {
+  .visitor-ticker { overflow-x: auto; mask-image: none; }
+  .visitor-ticker-track { animation: none; min-width: 0; }
+  .visitor-ticker-group[aria-hidden] { display: none; }
+  .visitor-statistics-caption [data-ticker-pause] { display: none; }
+  .globe-country-light { transition: none; }
+}
 /* About: quiet typography, open columns, and parallel background timelines. */
 .about-page {
   max-width: 1080px;

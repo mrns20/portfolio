@@ -1,9 +1,11 @@
 // Optional statistics stay off until an explicit choice is made.
 (() => {
-  const key = 'portfolio-privacy-v1';
+  const key = 'portfolio-privacy-v2';
   const blocked = navigator.globalPrivacyControl === true || navigator.doNotTrack === '1';
   let choice = null;
   try { choice = localStorage.getItem(key); } catch {}
+  // A country-only opt-in does not cover public city dots or activity.
+  try { if (choice === null && localStorage.getItem('portfolio-privacy-v1') === 'declined') choice = 'declined'; } catch {}
   if (!['accepted', 'declined'].includes(choice)) choice = null;
   const allowed = () => !blocked && choice === 'accepted';
   window.portfolioPrivacy = { allowed };
@@ -62,7 +64,7 @@
     panel.hidden = true;
     panel.setAttribute('aria-label', 'Optional visitor statistics');
     panel.innerHTML = `<div class="privacy-panel-content"><h2>A quick privacy note</h2>
-      <p>May this site count your visit and include your country in public totals? This uses a random tab ID and Cloudflare’s approximate country lookup. No city or live activity is shown. Records expire after 24 hours.</p>
+      <p>May this site count your visit, show your approximate city as a public globe dot, and include your activity in the online count? Cloudflare estimates your city from your IP. Even one visit is shown. Records expire after 24 hours.</p>
       <p data-status role="status"></p>
       <div class="privacy-actions"><button type="button" data-accept>Allow statistics</button><button type="button" data-decline>Decline / turn off</button><button type="button" data-close>Close</button></div>
       <button type="button" class="privacy-text-link" data-notice>Read privacy notice</button></div>`;
@@ -70,10 +72,10 @@
     notice.className = 'privacy-notice';
     notice.setAttribute('aria-labelledby', 'privacy-title');
     notice.innerHTML = `<h2 id="privacy-title">Privacy</h2>
-      <p>Updated 13 October 2026. Site operator: Marinos Tselani. Contact: <a href="mailto:marinotselani12@gmail.com">marinotselani12@gmail.com</a>.</p>
+      <p>Updated 14 October 2026. Site operator: Marinos Tselani. Contact: <a href="mailto:marinotselani12@gmail.com">marinotselani12@gmail.com</a>.</p>
       <h3>Optional statistics</h3>
-      <p>With your consent, your browser sends a random tab ID to Cloudflare. Cloudflare receives your IP address through the network request and derives an approximate country. The application stores the ID, country code and recording time, not your raw IP, city, coordinates, browser details or browsing history. Counts describe tab sessions, not unique people. Declining does not restrict the portfolio.</p>
-      <p>Country totals for the last 24 hours are public, only where at least three sessions are counted. No online status or last-seen time is published. Records leave public results after 24 hours and hourly cleanup removes them from the active database normally within 25 hours of recording. Provider backups and infrastructure logs have separate retention. Historical records from the previous map are no longer served and are scheduled for expiry.</p>
+      <p>With your consent, your browser sends a random tab ID to Cloudflare. Cloudflare receives your IP address and estimates your country and city. The application stores the ID, country, city, approximate coordinates rounded to two decimal places, creation time and last-active time. It does not store your raw IP or request GPS access. IP locations can be inaccurate. Visits count browser-tab sessions, not unique people. Declining does not restrict the portfolio.</p>
+      <p>Country totals, city dots and an overall online count are public, including groups with just one visit. A single visit can therefore reveal an approximate city and recent activity. While the site is visible, an opted-in tab sends an update about once a minute; online means active within the last two minutes. Public results contain aggregate counts and approximate city locations, never session IDs or individual timestamps. Visits leave results 24 hours after creation; activity updates do not extend this window. Hourly cleanup normally removes records within 25 hours. Provider backups and infrastructure logs have separate retention. Earlier country-only consent is not reused for city or activity collection.</p>
       <h3>Choices and storage</h3>
       <p>Use Privacy settings on any page to withdraw consent. Turning statistics off stops collection, clears this tab’s ID and requests deletion of its record. If the server cannot be reached, the record expires on schedule. Closing the tab clears its session ID. Your allow/decline preference is stored locally until changed or cleared. Do Not Track and Global Privacy Control override consent. Heading-animation state stays in page memory.</p>
       <h3>Providers</h3>

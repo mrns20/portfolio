@@ -34,11 +34,24 @@
     return yes;
   };
   const bounds = polygons.map(rings => ({ rings, minX: Math.min(...rings[0].map(p=>p[0])), maxX: Math.max(...rings[0].map(p=>p[0])), minY: Math.min(...rings[0].map(p=>p[1])), maxY: Math.max(...rings[0].map(p=>p[1])) }));
+  const countryShapes = world.objects.countries.geometries.flatMap(geometry => {
+    const groups = geometry.type === 'Polygon' ? [geometry.arcs] : geometry.arcs;
+    return groups.map(group => {
+      const rings = group.map(ring);
+      return { name: geometry.properties.name, rings, minX: Math.min(...rings[0].map(p=>p[0])), maxX: Math.max(...rings[0].map(p=>p[0])), minY: Math.min(...rings[0].map(p=>p[1])), maxY: Math.max(...rings[0].map(p=>p[1])) };
+    });
+  });
+  const contains = (p, lon, lat) => lon >= p.minX && lon <= p.maxX && lat >= p.minY && lat <= p.maxY && inside(lon,lat,p.rings[0]) && !p.rings.slice(1).some(hole=>inside(lon,lat,hole));
   const vector = ([lon,lat]) => [Math.cos(lat*rad)*Math.sin(lon*rad), Math.sin(lat*rad), Math.cos(lat*rad)*Math.cos(lon*rad)];
   const dots = [];
+  const countryDots = new Map();
   for (let lat = -60; lat <= 84; lat += 1.8) {
     for (let lon = -179; lon < 180; lon += 1.8 / Math.cos(lat*rad)) {
-      if (bounds.some(p => lon >= p.minX && lon <= p.maxX && lat >= p.minY && lat <= p.maxY && inside(lon,lat,p.rings[0]) && !p.rings.slice(1).some(hole=>inside(lon,lat,hole)))) dots.push(vector([lon,lat]));
+      if (bounds.some(p => contains(p,lon,lat))) {
+        const point = vector([lon,lat]); dots.push(point);
+        const country = countryShapes.find(p => contains(p,lon,lat));
+        if (country) { if (!countryDots.has(country.name)) countryDots.set(country.name, []); countryDots.get(country.name).push(point); }
+      }
     }
   }
   const densify = points => points.flatMap((point,i) => {
@@ -57,7 +70,6 @@
   for (let lon=-180;lon<180;lon+=20) grid.push(densify(Array.from({length:91},(_,i)=>[lon,-90+i*2])));
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
   const tilt = 12*rad, ct = Math.cos(tilt), st = Math.sin(tilt);
-  const athens = vector([23.7275,37.9838]);
   let svg, layers, frame=0, last=0, elapsed=0, previous=0;
   const create = (tag,attrs,parent) => {
     const node=document.createElementNS('http://www.w3.org/2000/svg',tag);
@@ -65,13 +77,28 @@
     parent.appendChild(node); return node;
   };
   let visitorMarkers = [];
+  let countryLights = [];
+  const displayNames = new Intl.DisplayNames(['en'], { type: 'region' });
+  const mapNames = { MM: 'Myanmar', TT: 'Trinidad and Tobago', US: 'United States of America', CD: 'Dem. Rep. Congo', CG: 'Congo', CF: 'Central African Rep.', DO: 'Dominican Rep.', GQ: 'Eq. Guinea', SS: 'S. Sudan', BA: 'Bosnia and Herz.', CZ: 'Czechia', MK: 'Macedonia', SZ: 'eSwatini', FK: 'Falkland Is.', TF: 'Fr. S. Antarctic Lands', SB: 'Solomon Is.', EH: 'W. Sahara', TW: 'Taiwan', PS: 'Palestine', TL: 'Timor-Leste', CI: "Côte d'Ivoire", TR: 'Turkey', XK: 'Kosovo' };
   const updateVisitors = () => {
     if (!svg?.isConnected || !layers?.visitors) return;
     layers.visitors.replaceChildren();
+    const previousLights = new Map(countryLights.map(light => [light.country, light]));
+    countryLights = (window.portfolioVisitorCountries || []).filter(item => item.country).map(item => {
+      const name = mapNames[item.country] || displayNames.of(item.country);
+      const points = countryDots.get(name);
+      if (!points) return null;
+      const previous = previousLights.get(item.country); previousLights.delete(item.country);
+      const node = previous?.node || create('path', { class: 'globe-country-light', fill: '#d39338', opacity: '0' }, layers.heat);
+      const opacity = Math.min(.95, .2 + Math.log2(item.visits + 1) * .13);
+      node.style.opacity = String(opacity);
+      return { country: item.country, node, points };
+    }).filter(Boolean);
+    previousLights.forEach(light => light.node.remove());
     visitorMarkers = (window.portfolioVisitorLocations || []).map(location => {
       const node = create('g', { class: 'globe-visitor' }, layers.visitors);
       const label = window.visitorLocationLabel?.(location) || `${location.visits} visits`;
-      const color = location.online > 0 ? '#38785c' : '#b77535';
+      const color = '#a86721';
       create('title', {}, node).textContent = label;
       create('circle', { r: '8', fill: 'transparent', class: 'globe-visitor-target' }, node);
       const radius = Math.min(4, 1.7 + Math.log2(location.visits + 1) * .35);
@@ -106,20 +133,19 @@
     layers.grid.setAttribute('d',path(grid));
     layers.coasts.setAttribute('d',path(coasts));
     layers.borders.setAttribute('d',path(borders));
-    layers.land.setAttribute('d',dots.map(point=>{
+    const dotPath = (points, size = .48) => points.map(point=>{
       const p=project(point); if(p[2]<.025)return '';
-      const x=160+140*p[0],y=160-140*p[1],r=(.48*Math.sqrt(p[2])).toFixed(2);
+      const x=160+140*p[0],y=160-140*p[1],r=(size*Math.sqrt(p[2])).toFixed(2);
       return `M${(x-Number(r)).toFixed(2)},${y.toFixed(2)}a${r},${r} 0 1,0 ${Number(r)*2},0a${r},${r} 0 1,0 ${-Number(r)*2},0`;
-    }).join(''));
+    }).join('');
+    layers.land.setAttribute('d',dotPath(dots));
+    for (const light of countryLights) light.node.setAttribute('d', dotPath(light.points, .88));
     for (const marker of visitorMarkers) {
       const point = project(marker.point);
       marker.node.setAttribute('visibility', point[2] > .02 ? 'visible' : 'hidden');
       marker.node.setAttribute('opacity', Math.max(0, Math.min(1, point[2] * 8)));
       marker.node.setAttribute('transform', `translate(${160 + 140 * point[0]} ${160 - 140 * point[1]})`);
     }
-    const p=project(athens);
-    layers.marker.setAttribute('opacity',Math.max(0,Math.min(1,p[2]*5)));
-    layers.marker.setAttribute('transform',`translate(${160+140*p[0]} ${160-140*p[1]})`);
   };
   const tick = time => {
     if(previous) elapsed+=Math.min(time-previous,100);
@@ -138,16 +164,11 @@
     layers.coasts.setAttribute('stroke-opacity','.85');
     layers.land.setAttribute('opacity','.65');
     layers.borders=svg.querySelector('.globe-borders') || create('path',{class:'globe-borders',fill:'none',stroke:'currentColor','stroke-opacity':'.3','stroke-width':'.4','stroke-linejoin':'round'},svg);
+    layers.heat=svg.querySelector('.globe-country-lights') || create('g',{class:'globe-country-lights'},svg);
+    countryLights = []; layers.heat.replaceChildren();
     layers.visitors=svg.querySelector('.globe-visitors') || create('g',{class:'globe-visitors'},svg);
     updateVisitors();
-    layers.marker=svg.querySelector('.globe-athens');
-    if(!layers.marker){
-      layers.marker=create('g',{class:'globe-athens'},svg);
-      create('circle',{r:'4.5',fill:'none',stroke:'currentColor','stroke-width':'.6',opacity:'.55'},layers.marker);
-      create('circle',{r:'1.8',fill:'currentColor'},layers.marker);
-      create('path',{d:'M5 0 H13 L17 -5',fill:'none',stroke:'currentColor','stroke-width':'.5',opacity:'.7'},layers.marker);
-      create('text',{x:'19',y:'-4',fill:'currentColor','font-family':'monospace','font-size':'5','letter-spacing':'.8'},layers.marker).textContent='ATHENS';
-    }
+    svg.querySelector('.globe-athens')?.remove();
     draw();
     if(!motion.matches&&!document.hidden)frame=requestAnimationFrame(tick);
   };
