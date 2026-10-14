@@ -149,6 +149,8 @@ document.addEventListener('DOMContentLoaded', () => {
     speech.append(speechLayout, speechCopy, announcement);
     footer.append(speech);
     let speaking = false;
+    let privacySpeaking = false;
+    document.addEventListener('portfolio:privacy-speech', event => { privacySpeaking = event.detail.active; });
     let counterSpeech = false;
     let songSpeech = '';
     let mergeSpeech = '';
@@ -282,20 +284,20 @@ document.addEventListener('DOMContentLoaded', () => {
       const edgeDistance = direction > 0 ? right - x : x - left;
       const edgeEase = Math.min(1, Math.max(.08, edgeDistance / Math.max(1, speed * .7)));
       const pauseEase = backtrackFor > 0 ? 1 : Math.min(1, Math.max(0, walkingFor / .6));
-      const targetVelocity = speaking || restingFor > 0 ? 0 : direction * speed * edgeEase * pauseEase;
+      const targetVelocity = speaking || privacySpeaking || restingFor > 0 ? 0 : direction * speed * edgeEase * pauseEase;
       // Exponential easing keeps acceleration consistent at different frame rates.
       velocity += (targetVelocity - velocity) * (1 - Math.exp(-elapsed / .22));
       x = Math.max(left, Math.min(right, x + velocity * elapsed));
       const moving = speed > 0 ? Math.min(1, Math.abs(velocity) / speed) : 0;
       gait += (moving - gait) * (1 - Math.exp(-elapsed / .16));
       stridePhase += elapsed * (Math.PI * 2 / 1.52) * moving;
-      if (!speaking && restingFor > 0) {
+      if (!speaking && !privacySpeaking && restingFor > 0) {
         restingFor -= elapsed;
         if (restingFor <= 0) {
           walker.classList.remove('is-resting');
           walkingFor = randomBetween(7, 12);
         }
-      } else if (!speaking && right > left) {
+      } else if (!speaking && !privacySpeaking && right > left) {
         // Keep the existing gentle pace: about 26 seconds across the track.
 
         if (backtrackFor <= 0) {

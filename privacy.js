@@ -7,10 +7,39 @@
   if (!['accepted', 'declined'].includes(choice)) choice = null;
   const allowed = () => !blocked && choice === 'accepted';
   window.portfolioPrivacy = { allowed };
-  let panel, notice;
+  let panel, notice, settings, promptShown = false, positionFrame;
+  const positionBubble = () => {
+    if (!panel || panel.hidden) return;
+    const walker = document.querySelector('.walker');
+    const footer = document.querySelector('.site-footer');
+    const bounds = (walker || footer).getBoundingClientRect();
+    const center = bounds.left + bounds.width / 2;
+    const width = panel.offsetWidth;
+    const left = Math.max(16, Math.min(innerWidth - width - 16, center - width / 2));
+    panel.style.left = `${left}px`;
+    panel.style.setProperty('--privacy-bottom', `${Math.max(16, innerHeight - bounds.top + 18)}px`);
+    panel.style.setProperty('--privacy-tail', `${Math.max(18, Math.min(width - 18, center - left))}px`);
+    positionFrame = requestAnimationFrame(positionBubble);
+  };
+  const showPanel = visible => {
+    if (!panel) return;
+    panel.hidden = !visible;
+    document.querySelector('.site-footer')?.classList.toggle('has-privacy-speech', visible);
+    document.dispatchEvent(new CustomEvent('portfolio:privacy-speech', { detail: { active: visible } }));
+    cancelAnimationFrame(positionFrame);
+    if (visible) positionBubble();
+  };
+  const firstConnect = () => {
+    if (!panel) return;
+    if (!document.querySelector('#connect')) { showPanel(false); return; }
+    if (!promptShown && choice === null && !blocked) {
+      promptShown = true;
+      update();
+      showPanel(true);
+    }
+  };
   const update = () => {
     if (!panel) return;
-    panel.hidden = choice !== null || blocked;
     panel.querySelector('[data-accept]').disabled = blocked;
     panel.querySelector('[data-status]').textContent = blocked ? 'Your browser privacy signal keeps statistics off.' : allowed() ? 'Statistics are currently on.' : 'Statistics are currently off.';
   };
@@ -18,22 +47,25 @@
     choice = value;
     try { localStorage.setItem(key, value); } catch {}
     update();
+    showPanel(false);
+    settings?.focus();
     document.dispatchEvent(new Event('portfolio:privacy'));
   };
   window.addEventListener('storage', event => {
     if (event.key !== key && event.key !== null) return;
     choice = ['accepted', 'declined'].includes(event.newValue) ? event.newValue : null;
-    update(); document.dispatchEvent(new Event('portfolio:privacy'));
+    update(); showPanel(false); document.dispatchEvent(new Event('portfolio:privacy'));
   });
   document.addEventListener('DOMContentLoaded', () => {
     panel = document.createElement('section');
     panel.className = 'privacy-panel';
+    panel.hidden = true;
     panel.setAttribute('aria-label', 'Optional visitor statistics');
-    panel.innerHTML = `<h2>Optional visitor statistics</h2>
+    panel.innerHTML = `<div class="privacy-panel-content"><h2>A quick privacy note</h2>
       <p>May this site count your visit and include your country in public totals? This uses a random tab ID and Cloudflare’s approximate country lookup. No city or live activity is shown. Records expire after 24 hours.</p>
       <p data-status role="status"></p>
       <div class="privacy-actions"><button type="button" data-accept>Allow statistics</button><button type="button" data-decline>Decline / turn off</button><button type="button" data-close>Close</button></div>
-      <button type="button" class="privacy-text-link" data-notice>Read privacy notice</button>`;
+      <button type="button" class="privacy-text-link" data-notice>Read privacy notice</button></div>`;
     notice = document.createElement('dialog');
     notice.className = 'privacy-notice';
     notice.setAttribute('aria-labelledby', 'privacy-title');
@@ -51,16 +83,24 @@
       <p>Withdrawal does not affect earlier lawful processing. Where applicable, you may request access, correction, erasure, restriction or portability, and object to processing. Contact the address above; locating a record may require its random tab ID. You may complain to the <a href="https://www.dpa.gr/" target="_blank" rel="noopener noreferrer">Hellenic Data Protection Authority</a>.</p>
       <form method="dialog"><button>Close privacy notice</button></form>`;
     document.body.append(panel, notice);
-    const settings = document.createElement('button');
+    settings = document.createElement('button');
     settings.type = 'button'; settings.className = 'privacy-settings'; settings.textContent = 'Privacy settings';
-    settings.addEventListener('click', () => { update(); panel.hidden = false; panel.querySelector('[data-decline]').focus(); });
+    settings.addEventListener('click', () => { update(); showPanel(true); panel.querySelector('[data-decline]').focus(); });
     const footerIdentity = document.querySelector('.site-footer .footer-side');
-    footerIdentity.classList.add('footer-identity');
-    footerIdentity.append(settings);
+    const footerCenter = document.createElement('div');
+    footerCenter.className = 'footer-center';
+    const footer = footerIdentity.closest('.site-footer');
+    footerCenter.append(footerIdentity, footer.querySelector('.footer-counter'), settings);
+    footer.append(footerCenter);
     panel.querySelector('[data-accept]').addEventListener('click', () => { if (!blocked) choose('accepted'); });
     panel.querySelector('[data-decline]').addEventListener('click', () => choose('declined'));
-    panel.querySelector('[data-close]').addEventListener('click', () => { panel.hidden = true; settings.focus(); });
+    panel.querySelector('[data-close]').addEventListener('click', () => { showPanel(false); settings.focus(); });
+    panel.addEventListener('keydown', event => { if (event.key === 'Escape') { showPanel(false); settings.focus(); } });
     panel.querySelector('[data-notice]').addEventListener('click', () => notice.showModal());
     update();
+    firstConnect();
   });
+  document.addEventListener('portfolio:page', firstConnect);
+  window.addEventListener('pagehide', () => { cancelAnimationFrame(positionFrame); });
+  window.addEventListener('pageshow', event => { if (event.persisted && panel && !panel.hidden) { cancelAnimationFrame(positionFrame); positionBubble(); } });
 })();
