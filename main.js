@@ -23,6 +23,7 @@ const initializePage = () => {
   const cvButton = document.querySelector('.cv-download');
   if (cvButton) {
     on(cvButton, 'click', () => {
+      if (cvButton.disabled) return;
       const bytes = Uint8Array.from(atob(window.portfolioCvBase64), char => char.charCodeAt(0));
       const url = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }));
       const download = document.createElement('a');
@@ -353,7 +354,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     const announceAboutCv = () => {
       const hadPageSpeech = !!pageSpeech;
-      pageSpeech = document.querySelector('.about-page .cv-download')
+      pageSpeech = document.querySelector('.about-page .cv-download:not(:disabled)')
         ? "DEAR VISITOR, YOU CAN DOWNLOAD MARINO'S CV BY PRESSING THE DOWNLOAD CV BUTTON." : '';
       if (pageSpeech || hadPageSpeech) renderSpeech(true);
     };
