@@ -374,7 +374,7 @@ class PortfolioMusicPlayer {
   constructor(tracks, changed) {
     this.tracks = tracks;
     this.changed = changed;
-    this.index = 0;
+    this.index = Math.floor(Math.random() * tracks.length);
     this.voices = [];
     this.buffers = new Map();
     this.pendingBuffers = new Map();
@@ -501,7 +501,7 @@ class PortfolioMusicPlayer {
     try {
       this.initialize();
       if (!this.enabled) await this.context.suspend();
-      const index = (this.index + 1) % this.tracks.length;
+      const index = (this.index + 1 + Math.floor(Math.random() * (this.tracks.length - 1))) % this.tracks.length;
       const buffer = await this.load(index);
       const now = this.context.currentTime;
       for (const voice of [...this.voices]) {
@@ -530,9 +530,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const footer = document.querySelector('.site-footer');
   if (!footer) return;
   const tracks = window.portfolioTracks || [
-    { title: 'Kids See Ghosts — instrumental', src: 'assets/audio/kids-see-ghosts-instrumental.mp3', localSource: 'assets/audio/local-music.js' },
-    { title: 'Kanye West — 80 Degrees (instrumental)', src: 'assets/audio/80-degrees-instrumental.mp3', localSource: 'assets/audio/local-80-degrees.js' },
-    { title: 'Kanye West — Gone (instrumental)', src: 'assets/audio/gone-instrumental.mp3', localSource: 'assets/audio/local-gone.js' }
+    { title: 'Kids See Ghosts', src: 'assets/audio/kids-see-ghosts-instrumental.mp3', localSource: 'assets/audio/local-music.js' },
+    { title: '80 Degrees', src: 'assets/audio/80-degrees-instrumental.mp3', localSource: 'assets/audio/local-80-degrees.js' },
+    { title: 'Gone', src: 'assets/audio/gone-instrumental.mp3', localSource: 'assets/audio/local-gone.js' },
+    { title: 'Believer', src: 'assets/audio/believer-instrumental.mp3', localSource: 'assets/audio/local-believer.js' }
   ];
   const controls = document.createElement('div');
   controls.className = 'music-controls';
@@ -550,7 +551,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const player = new PortfolioMusicPlayer(tracks, track => {
     document.dispatchEvent(new CustomEvent('portfolio:speech', { detail: { kind: 'song', text: track.title } }));
     status.hidden = true;
-    status.textContent = 'Selected: ' + track.title;
+    status.textContent = track.title;
   });
   const orbit = document.querySelector('.welcome-orbit');
   const motionPreference = matchMedia('(prefers-reduced-motion: reduce)');
@@ -759,7 +760,10 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   next.addEventListener('click', async () => {
     next.disabled = true;
-    try { await player.next(); connectVisuals(); }
+    try {
+      if (player.enabled && player.context?.state === 'suspended') player.context.resume().catch(() => {});
+      await player.next(); connectVisuals();
+    }
     catch (error) { status.hidden = false; status.textContent = 'Could not load the next song: ' + (error.message || 'Please try again.'); }
     finally { next.disabled = tracks.length < 2; }
   });
@@ -771,7 +775,29 @@ document.addEventListener('DOMContentLoaded', () => {
   motionPreference.addEventListener('change', () => {
     if (motionPreference.matches) stopVisuals(); else startVisuals();
   });
-  render();
+  // Request sound immediately, then retry inside a gesture if autoplay is blocked.
+  const startDefaultMusic = async () => {
+    try {
+      const pending = player.setEnabled(true);
+      render();
+      await pending;
+      connectVisuals();
+      if (player.enabled) player.changed(tracks[player.index]);
+    } catch (error) {
+      if (error.name === 'NotAllowedError') return;
+      await player.setEnabled(false);
+      render();
+      status.hidden = false;
+      status.textContent = 'Music could not play. Select sound on to try again.';
+    }
+  };
+  const unlockMusic = event => {
+    if (event.target.closest?.('.music-controls')) return;
+    if (player.enabled && player.context?.state === 'suspended') startDefaultMusic();
+  };
+  document.addEventListener('pointerdown', unlockMusic);
+  document.addEventListener('keydown', unlockMusic);
+  startDefaultMusic();
 });
 
 // Calendar breakdown in Athens, from years down to seconds.
