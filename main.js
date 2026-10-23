@@ -533,7 +533,8 @@ document.addEventListener('DOMContentLoaded', () => {
     { title: 'Kids See Ghosts', src: 'assets/audio/kids-see-ghosts-instrumental.mp3', localSource: 'assets/audio/local-music.js' },
     { title: '80 Degrees', src: 'assets/audio/80-degrees-instrumental.mp3', localSource: 'assets/audio/local-80-degrees.js' },
     { title: 'Gone', src: 'assets/audio/gone-instrumental.mp3', localSource: 'assets/audio/local-gone.js' },
-    { title: 'Believer', src: 'assets/audio/believer-instrumental.mp3', localSource: 'assets/audio/local-believer.js' }
+    { title: 'Believer', src: 'assets/audio/believer-instrumental.mp3', localSource: 'assets/audio/local-believer.js' },
+    { title: 'Violent Crimes', src: 'assets/audio/violent-crimes-instrumental.mp3', localSource: 'assets/audio/local-violent-crimes.js' }
   ];
   const controls = document.createElement('div');
   controls.className = 'music-controls';
