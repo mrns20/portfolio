@@ -798,6 +798,10 @@ document.addEventListener('DOMContentLoaded', () => {
   };
   document.addEventListener('pointerdown', unlockMusic);
   document.addEventListener('keydown', unlockMusic);
+  // Movement can retry playback, but does not bypass browser autoplay restrictions.
+  document.addEventListener('mousemove', () => {
+    if (player.enabled && player.context?.state === 'suspended') startDefaultMusic();
+  }, { once: true, passive: true });
   startDefaultMusic();
 });
 
