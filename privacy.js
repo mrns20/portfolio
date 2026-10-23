@@ -6,7 +6,8 @@
   try { choice = localStorage.getItem(key); } catch {}
   // A country-only opt-in does not cover public city dots or activity.
   try { if (choice === null && localStorage.getItem('portfolio-privacy-v1') === 'declined') choice = 'declined'; } catch {}
-  if (!['accepted', 'declined'].includes(choice)) choice = null;
+  // Remember refusals only. Location sharing must be explicitly allowed on this visit.
+  if (choice !== 'declined') choice = null;
   const allowed = () => !blocked && choice === 'accepted';
   window.portfolioPrivacy = { allowed };
   let panel, notice, settings, promptShown = false, positionFrame;
@@ -47,7 +48,10 @@
   };
   const choose = value => {
     choice = value;
-    try { localStorage.setItem(key, value); } catch {}
+    try {
+      if (value === 'declined') localStorage.setItem(key, value);
+      else localStorage.removeItem(key);
+    } catch {}
     update();
     showPanel(false);
     settings?.focus();
@@ -55,29 +59,30 @@
   };
   window.addEventListener('storage', event => {
     if (event.key !== key && event.key !== null) return;
-    choice = ['accepted', 'declined'].includes(event.newValue) ? event.newValue : null;
+    // Another tab can revoke permission, but cannot grant it for this visit.
+    choice = event.newValue === 'declined' ? 'declined' : null;
     update(); showPanel(false); document.dispatchEvent(new Event('portfolio:privacy'));
   });
   document.addEventListener('DOMContentLoaded', () => {
     panel = document.createElement('section');
     panel.className = 'privacy-panel';
     panel.hidden = true;
-    panel.setAttribute('aria-label', 'Optional visitor statistics');
-    panel.innerHTML = `<div class="privacy-panel-content"><h2>A quick privacy note</h2>
-      <p>May this site count your visit, show your approximate city as a public globe dot, and include your activity in the online count? Cloudflare estimates your city from your IP. Even one visit is shown. Records expire after 24 hours.</p>
+    panel.setAttribute('aria-label', 'Optional location sharing');
+    panel.innerHTML = `<div class="privacy-panel-content"><h2>Share your approximate location?</h2>
+      <p>Only if you allow it, Cloudflare will estimate your city from your IP address. Your approximate city will appear as a public globe dot, and your visit and activity will be counted. Even one visit is shown. Records expire after 24 hours. Closing this prompt keeps location sharing off.</p>
       <p data-status role="status"></p>
-      <div class="privacy-actions"><button type="button" data-accept>Allow statistics</button><button type="button" data-decline>Decline / turn off</button><button type="button" data-close>Close</button></div>
+      <div class="privacy-actions"><button type="button" data-accept>Share location for this visit</button><button type="button" data-decline>Decline / turn off</button><button type="button" data-close>Close</button></div>
       <button type="button" class="privacy-text-link" data-notice>Read privacy notice</button></div>`;
     notice = document.createElement('dialog');
     notice.className = 'privacy-notice';
     notice.setAttribute('aria-labelledby', 'privacy-title');
     notice.innerHTML = `<h2 id="privacy-title">Privacy</h2>
-      <p>Updated 14 October 2026. Site operator: Marinos Tselani. Contact: <a href="mailto:marinotselani12@gmail.com">marinotselani12@gmail.com</a>.</p>
+      <p>Updated 23 October 2026. Site operator: Marinos Tselani. Contact: <a href="mailto:marinotselani12@gmail.com">marinotselani12@gmail.com</a>.</p>
       <h3>Optional statistics</h3>
       <p>With your consent, your browser sends a random tab ID to Cloudflare. Cloudflare receives your IP address and estimates your country and city. The application stores the ID, country, city, approximate coordinates rounded to two decimal places, creation time and last-active time. It does not store your raw IP or request GPS access. IP locations can be inaccurate. Visits count browser-tab sessions, not unique people. Declining does not restrict the portfolio.</p>
       <p>Country totals, city dots and an overall online count are public, including groups with just one visit. A single visit can therefore reveal an approximate city and recent activity. While the site is visible, an opted-in tab sends an update about once a minute; online means active within the last two minutes. Public results contain aggregate counts and approximate city locations, never session IDs or individual timestamps. Visits leave results 24 hours after creation; activity updates do not extend this window. Hourly cleanup normally removes records within 25 hours. Provider backups and infrastructure logs have separate retention. Earlier country-only consent is not reused for city or activity collection.</p>
       <h3>Choices and storage</h3>
-      <p>Use Privacy settings on any page to withdraw consent. Turning statistics off stops collection, clears this tab’s ID and requests deletion of its record. If the server cannot be reached, the record expires on schedule. Closing the tab clears its session ID. Your allow/decline preference is stored locally until changed or cleared. Do Not Track and Global Privacy Control override consent. Heading-animation state stays in page memory.</p>
+      <p>Use Privacy settings on any page to withdraw consent. Turning statistics off stops collection, clears this tab’s ID and requests deletion of its record. If the server cannot be reached, the record expires on schedule. Closing the tab clears its session ID. Permission lasts only for this visit and is not restored after reloading or reopening the site. Declining is remembered locally until changed or cleared. Do Not Track and Global Privacy Control override consent. Heading-animation state stays in page memory.</p>
       <h3>Providers</h3>
       <p>GitHub Pages hosts this website; Cloudflare Workers and D1 provide optional statistics. Providers process network requests and may process data outside the EEA under their applicable terms and safeguards. Fonts are hosted with this website, without Google Fonts requests. External links contact their destinations when followed.</p>
       <p><a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener noreferrer">GitHub privacy</a> · <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener noreferrer">Cloudflare privacy</a></p>
